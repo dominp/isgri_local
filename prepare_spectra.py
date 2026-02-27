@@ -27,13 +27,14 @@ def prepare_spectra_files(workdir, source):
         print(rf"qsub -N {source} job.sh", file=f)
 
 
-def edit_spectra_template(template, source, maxno, emin, emax, bins):
+def edit_spectra_template(template, source, maxno, emin, emax, bins, osa_workpath):
     template_keys = {
         "TEMPLATE_MAXNO": maxno,
         "TEMPLATE_SOURCE": source,
         "TEMPLATE_EMIN": emin,
         "TEMPLATE_EMAX": emax,
         "TEMPLATE_BINS": bins,
+        "TEMPLATE_OSA_RBP": osa_workpath,
     }
     for key in template_keys:
         template = template.replace(key, str(template_keys[key]))
@@ -41,14 +42,13 @@ def edit_spectra_template(template, source, maxno, emin, emax, bins):
 
 
 def prepare_spectra(
-    bursts,
     source,
+    data,
     workdir,
-    margins=(0, 0),
+    osa_workpath,
     emin=20,
     emax=300,
-    bins=12,
-    pif_path=None,
+    bins=-12,
 ):
     """
     Prepares the spectra files for the given data and source.
@@ -68,16 +68,16 @@ def prepare_spectra(
     print("Workdir:", workdir)
     print("Source:", source)
     print("Emin:", emin, "Emax:", emax, "Bins:", bins)
+    if not os.path.exists(data):
+        raise ValueError("Data file does not exist")
+    shutil.copy(data, os.path.join(workdir, "data.txt"))
+    with open(os.path.join(workdir, "data.txt")) as f:
+        lines = f.readlines()
+
     prepare_spectra_files(workdir, source)
 
-    data = bursts.data
     with open(template_path + "bursts_spectrum.sh") as f:
         template = f.read()
-    template = edit_spectra_template(template, source, len(data), emin, emax, bins)
+    template = edit_spectra_template(template, source, len(lines), emin, emax, bins, osa_workpath)
     with open(os.path.join(workdir, "job.sh"), "w") as f:
         f.write(template)
-
-    with open(os.path.join(workdir, "data.txt"), "w") as f:
-        for burst in bursts.data:
-            swid = str(burst["rev"]).zfill(4) + str(burst["scw"]).zfill(4) + "0010"
-            print(swid, burst["UID"], burst["BB_tstart"] - margins[0], burst["BB_tstop"] + margins[1], sep=",", file=f)

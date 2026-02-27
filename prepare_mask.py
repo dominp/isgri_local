@@ -89,6 +89,7 @@ def prepare_masks(
     emin=15,
     emax=300,
     location="werewolf",
+    max_scws=5000,
 ):
     """Prepare PBS job scripts for ISGRI mask creation.
 
@@ -154,7 +155,7 @@ def prepare_masks(
         )
 
     scw_name = name + "_"
-    no_scws, scw_lists = create_scw_file(os.path.join(workdir, "scw"), scw_name, scws)
+    no_scws, scw_lists = create_scw_file(os.path.join(workdir, "scw"), scw_name, scws, maxno=max_scws)
 
     if nodes is None:
         nodes = ["4", "5"]
@@ -275,6 +276,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--location", type=str, default="werewolf", help="Location for mask creation template (default: werewolf)"
     )
+    parser.add_argument(
+        "--max-scws", type=int, default=5000, help="Maximum number of ScWs per job script (default: 5000)"
+    )
 
     args = parser.parse_args()
 
@@ -297,4 +301,5 @@ if __name__ == "__main__":
         emin=args.emin,
         emax=args.emax,
         location=args.location,
+        max_scws=args.max_scws,
     )

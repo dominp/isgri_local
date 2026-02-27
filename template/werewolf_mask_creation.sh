@@ -20,7 +20,7 @@ osainit
 
 export REP_BASE_PROD=TEMPLATE_OSA_RBP
 export PFILES="${REP_BASE_PROD}/obs/${id}/pfiles;${ISDC_ENV}/pfiles:$HEADAS/syspfiles"
-export ISDC_REF_CAT=$(get_ssd)/dominik/cat/hec/gnrl_refr_cat_0043.fits
+export ISDC_REF_CAT=${REP_BASE_PROD}/cat/hec/gnrl_refr_cat_0043.fits
 export COMMONSCRIPT=1
 
 #####
